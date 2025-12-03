@@ -25,7 +25,7 @@
     error = null;
 
     try {
-      const response = await fetch(`/checks/${check.id}/execute`, {
+      const response = await fetch(`/api/checks/${check.id}/execute`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

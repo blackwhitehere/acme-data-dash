@@ -6,9 +6,6 @@ You are an expert AI programming assistant working on the `acme-rust-template` p
 
 - **Follow `CONTRIBUTING.md`**: Always adhere to the guidelines specified in [CONTRIBUTING.md](../CONTRIBUTING.md). This is your primary source of truth for development workflows and standards.
 - **Rust Idioms**: Write idiomatic Rust code. Follow the official [Rust Style Guide](https://github.com/rust-lang/style-team).
-- **Performance**: This is a performance-sensitive tool.
-    - Use `rayon` for parallel processing where appropriate.
-    - Minimize allocations and I/O operations.
 - **Safety**: Prefer safe Rust. Only use `unsafe` if absolutely necessary and strictly documented.
 
 ## Development Workflow

@@ -9,6 +9,7 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use crate::checks::{DataCheck, CheckContext, CheckResult};
 use crate::db::Db;
+use crate::connections::ConnectionProfile;
 
 pub struct AppState {
     pub checks: HashMap<String, Arc<dyn DataCheck>>,
@@ -21,11 +22,19 @@ pub struct ExecuteRequest {
     pub params: HashMap<String, Value>,
 }
 
+#[derive(Deserialize)]
+pub struct SaveSecretRequest {
+    pub key: String,
+    pub value: String,
+}
+
 pub fn app_router(state: Arc<AppState>) -> Router {
     Router::new()
-        .route("/checks", get(list_checks))
-        .route("/checks/:id/execute", post(execute_check))
-        .route("/history", get(get_history))
+        .route("/api/checks", get(list_checks))
+        .route("/api/checks/:id/execute", post(execute_check))
+        .route("/api/history", get(get_history))
+        .route("/api/connections", get(list_connections).post(save_connection))
+        .route("/api/secrets", get(list_secrets).post(save_secret))
         .with_state(state)
 }
 
@@ -69,6 +78,48 @@ async fn get_history(State(state): State<Arc<AppState>>) -> Json<Vec<HistoryEntr
             Json(history)
         },
         Err(_) => Json(vec![]),
+    }
+}
+
+async fn list_connections(State(state): State<Arc<AppState>>) -> Json<Vec<ConnectionProfile>> {
+    match state.db.get_connection_profiles().await {
+        Ok(profiles) => {
+            let result = profiles.into_iter().map(|(name, driver, tmpl, secret_ref)| ConnectionProfile {
+                name,
+                driver,
+                connection_string_template: tmpl,
+                secret_ref,
+            }).collect();
+            Json(result)
+        },
+        Err(_) => Json(vec![]),
+    }
+}
+
+async fn save_connection(
+    State(state): State<Arc<AppState>>,
+    Json(profile): Json<ConnectionProfile>,
+) -> Json<Result<(), String>> {
+    match state.db.save_connection_profile(&profile.name, &profile.driver, &profile.connection_string_template, profile.secret_ref.as_deref()).await {
+        Ok(_) => Json(Ok(())),
+        Err(e) => Json(Err(e.to_string())),
+    }
+}
+
+async fn list_secrets(State(state): State<Arc<AppState>>) -> Json<Vec<String>> {
+    match state.db.get_secrets().await {
+        Ok(secrets) => Json(secrets),
+        Err(_) => Json(vec![]),
+    }
+}
+
+async fn save_secret(
+    State(state): State<Arc<AppState>>,
+    Json(req): Json<SaveSecretRequest>,
+) -> Json<Result<(), String>> {
+    match state.db.save_secret(&req.key, &req.value).await {
+        Ok(_) => Json(Ok(())),
+        Err(e) => Json(Err(e.to_string())),
     }
 }
 

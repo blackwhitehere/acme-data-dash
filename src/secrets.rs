@@ -25,6 +25,27 @@ impl SecretStore for EnvVarSecretStore {
     }
 }
 
+use crate::db::Db;
+
+pub struct DbSecretStore {
+    db: Db,
+}
+
+impl DbSecretStore {
+    pub fn new(db: Db) -> Self {
+        Self { db }
+    }
+}
+
+#[async_trait]
+impl SecretStore for DbSecretStore {
+    async fn get_secret(&self, key: &str) -> Result<String, SecretError> {
+        self.db.get_secret(key).await
+            .map_err(|e| SecretError::StoreError(e.to_string()))?
+            .ok_or_else(|| SecretError::NotFound(key.to_string()))
+    }
+}
+
 pub struct MemorySecretStore {
     secrets: HashMap<String, String>,
 }

@@ -3,6 +3,9 @@
 # Set up environment
 export DATABASE_URL=sqlite:data_dash.db
 
+# Reset DB
+./scripts/reset_db.sh
+
 # Function to kill background processes on exit
 cleanup() {
     echo "Stopping services..."

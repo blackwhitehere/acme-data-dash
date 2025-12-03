@@ -6,7 +6,7 @@
 
   onMount(async () => {
     try {
-      const res = await fetch('/history');
+      const res = await fetch('/api/history');
       history = await res.json();
     } catch (e) {
       console.error(e);

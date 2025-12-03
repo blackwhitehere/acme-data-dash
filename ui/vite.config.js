@@ -6,8 +6,7 @@ export default defineConfig({
   plugins: [svelte()],
   server: {
     proxy: {
-      '/checks': 'http://localhost:3000',
-      '/history': 'http://localhost:3000'
+      '/api': 'http://localhost:3000'
     }
   }
 })

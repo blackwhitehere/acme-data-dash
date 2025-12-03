@@ -6,3 +6,8 @@ benchmark:
     python3 benches/benchmark.py
     python3 benches/generate_graph.py benches/benchmark_results.json docs/benchmark_graph.svg
     @echo "Graph generated at docs/benchmark_graph.svg"
+
+# Run application in development mode
+dev:
+    ./dev.sh
+

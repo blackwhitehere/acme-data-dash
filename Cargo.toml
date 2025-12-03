@@ -1,16 +1,11 @@
 [package]
-name = "acme-rust-template"
+name = "acme-data-dash"
 version = "0.1.0"
 edition = "2021"
 authors = ["Your Name <your.email@example.com>"]
-description = "A template for Rust projects"
-repository = "https://github.com/yourusername/acme-rust-template"
-homepage = "https://github.com/yourusername/acme-rust-template"
-documentation = "https://docs.rs/acme-rust-template"
-readme = "README.md"
+description = "Data Availability Dashboard"
+repository = "https://github.com/yourusername/acme-data-dash"
 license = "Apache-2.0"
-keywords = ["template", "rust", "cli"]
-categories = ["command-line-utilities"]
 
 [dependencies]
 log = "0.4"
@@ -19,14 +14,25 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 clap = { version = "4.0", features = ["derive"] }
 rayon = "1.10"
+tokio = { version = "1.0", features = ["full"] }
+axum = "0.7"
+sqlx = { version = "0.7", features = ["runtime-tokio-native-tls", "sqlite", "chrono"] }
+anyhow = "1.0"
+thiserror = "1.0"
+async-trait = "0.1"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1.0", features = ["v4", "serde"] }
+tower-http = { version = "0.5", features = ["cors", "trace", "fs"] }
 
 [dev-dependencies]
-criterion = "0.5" # Benchmarking library
+criterion = "0.5"
 
-[profile.profiling] # For profiling builds
+[profile.profiling]
 inherits = "release"
 debug = true
 
-[[bench]] # Sample benchmark
+[[bench]]
 name = "main_benchmark"
 harness = false

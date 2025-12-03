@@ -1,46 +1,60 @@
-use acme_rust_template::add;
-use clap::Parser;
-use log::{debug, info};
+use acme_data_dash::{
+    api::{app_router, AppState},
+    checks::{example_check::ExampleCheck, DataCheck, StandardCheckContext},
+    connections::{ConnectionManager, ConnectionProfile},
+    db::Db,
+    secrets::EnvVarSecretStore,
+};
+use std::collections::HashMap;
+use std::sync::Arc;
+use tokio::net::TcpListener;
+use tracing::info;
+use tower_http::services::ServeDir;
 
-#[derive(Parser, Debug)]
-#[command(author, version, about, long_about = None)]
-struct Args {
-    /// Name of the person to greet
-    #[arg(short, long, default_value = "World")]
-    name: String,
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    // Initialize logging
+    tracing_subscriber::fmt::init();
 
-    /// Number of times to greet
-    #[arg(short, long, default_value_t = 1)]
-    count: u8,
-}
+    info!("Starting Acme Data Dash...");
 
-/// The main logic that can be benchmarked
-pub fn run(name: &str, count: u8) -> i32 {
-    info!("Running logic with name: {} and count: {}", name, count);
-    
-    let result = add(40, 2);
-    println!("40 + 2 = {}", result);
+    // 1. Initialize Secrets
+    let secret_store = Arc::new(EnvVarSecretStore);
 
-    debug!("Running print loop");
-    for i in 0..count {
-        println!("Hello {}! (iteration {})", name, i + 1);
-        debug!("Print iteration: {}", i);
-    }
+    // 2. Initialize Connections (Dummy config for now)
+    let profiles = vec![
+        ConnectionProfile {
+            name: "default_db".to_string(),
+            driver: "sqlite".to_string(),
+            connection_string_template: "sqlite::memory:".to_string(),
+            secret_ref: None,
+        }
+    ];
+    let connection_manager = Arc::new(ConnectionManager::new(profiles, secret_store));
+    let check_context = Arc::new(StandardCheckContext { connection_manager });
 
-    result
-}
+    // 3. Initialize DB
+    let db = Db::new("sqlite:data_dash.db").await?;
 
-fn main() {
-    // Initialize the logger
-    if let Err(e) = acme_rust_template::logger::init() {
-        eprintln!("Failed to initialize logger: {}", e);
-        std::process::exit(1);
-    }
+    // 4. Register Checks
+    let mut checks: HashMap<String, Arc<dyn DataCheck>> = HashMap::new();
+    let example = Arc::new(ExampleCheck);
+    checks.insert(example.id().to_string(), example);
 
-    info!("Application started");
+    // 5. Build App State
+    let state = Arc::new(AppState {
+        checks,
+        check_context,
+        db,
+    });
 
-    let args = Args::parse();
-    let result = run(&args.name, args.count);
+    // 6. Start Server
+    let api = app_router(state);
+    let app = api.nest_service("/", ServeDir::new("ui/dist"));
 
-    info!("Application finished successfully with result: {}", result);
+    let listener = TcpListener::bind("0.0.0.0:3000").await?;
+    info!("Listening on {}", listener.local_addr()?);
+    axum::serve(listener, app).await?;
+
+    Ok(())
 }

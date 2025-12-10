@@ -39,7 +39,10 @@ pub struct ParameterDefinition {
 
 #[async_trait]
 pub trait CheckContext: Send + Sync {
-    async fn get_connection_string(&self, name: &str) -> Result<String, crate::connections::ConnectionError>;
+    async fn get_connection_string(
+        &self,
+        name: &str,
+    ) -> Result<String, crate::connections::ConnectionError>;
 }
 
 pub struct StandardCheckContext {
@@ -48,7 +51,10 @@ pub struct StandardCheckContext {
 
 #[async_trait]
 impl CheckContext for StandardCheckContext {
-    async fn get_connection_string(&self, name: &str) -> Result<String, crate::connections::ConnectionError> {
+    async fn get_connection_string(
+        &self,
+        name: &str,
+    ) -> Result<String, crate::connections::ConnectionError> {
         self.connection_manager.get_connection_string(name).await
     }
 }

@@ -1,28 +1,30 @@
-use acme_rust_template::add;
-use criterion::{Criterion, black_box, criterion_group, criterion_main};
+use criterion::{black_box, criterion_group, criterion_main, Criterion};
 
-// We need to import the run function from main
-// Since main.rs is a binary, we'll benchmark the add function directly
-// and create a similar benchmark for the main logic
-
-fn benchmark_add_function(c: &mut Criterion) {
-    c.bench_function("add 5 + 3", |b| {
+// Benchmark for database operations
+fn benchmark_db_operations(c: &mut Criterion) {
+    c.bench_function("string manipulation", |b| {
         b.iter(|| {
-            // Use black_box to prevent the compiler from optimizing away the computation
-            black_box(add(black_box(5), black_box(3)))
+            // Benchmark a simple operation as placeholder
+            let test_string = black_box("test_connection");
+            black_box(test_string.to_string())
         })
     });
 }
 
-fn benchmark_main_logic(c: &mut Criterion) {
-    c.bench_function("main logic", |b| {
+// Benchmark for connection string parsing
+fn benchmark_connection_parsing(c: &mut Criterion) {
+    c.bench_function("connection string parsing", |b| {
         b.iter(|| {
-            // Benchmark the same computation that happens in main
-            let result = black_box(add(black_box(5), black_box(3)));
-            black_box(result)
+            let conn_str = black_box("DSN=mydb;UID=user;PWD=pass");
+            let parts: Vec<&str> = conn_str.split(';').collect();
+            black_box(parts)
         })
     });
 }
 
-criterion_group!(benches, benchmark_add_function, benchmark_main_logic);
+criterion_group!(
+    benches,
+    benchmark_db_operations,
+    benchmark_connection_parsing
+);
 criterion_main!(benches);

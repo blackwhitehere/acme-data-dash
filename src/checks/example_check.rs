@@ -1,4 +1,4 @@
-use super::{CheckContext, CheckResult, CheckStatus, DataCheck, ParameterDefinition, CheckError};
+use super::{CheckContext, CheckError, CheckResult, CheckStatus, DataCheck, ParameterDefinition};
 use async_trait::async_trait;
 use serde_json::Value;
 use std::collections::HashMap;
@@ -28,10 +28,14 @@ impl DataCheck for ExampleCheck {
         ctx: &dyn CheckContext,
         params: &HashMap<String, Value>,
     ) -> Result<CheckResult, CheckError> {
-        let _date = params.get("target_date").ok_or(CheckError::ConfigError("Missing target_date".to_string()))?;
-        
+        let _date = params
+            .get("target_date")
+            .ok_or(CheckError::ConfigError("Missing target_date".to_string()))?;
+
         // Simulate getting a connection
-        let _conn_str = ctx.get_connection_string("default_db").await
+        let _conn_str = ctx
+            .get_connection_string("default_db")
+            .await
             .map_err(|e| CheckError::ExecutionError(e.to_string()))?;
 
         // In a real check, we would use sqlx or odbc-api here to query the DB.
@@ -68,7 +72,10 @@ mod tests {
         let check = ExampleCheck;
         let ctx = MockContext;
         let mut params = HashMap::new();
-        params.insert("target_date".to_string(), Value::String("2023-10-27".to_string()));
+        params.insert(
+            "target_date".to_string(),
+            Value::String("2023-10-27".to_string()),
+        );
 
         let result = check.execute(&ctx, &params).await.unwrap();
         assert!(matches!(result.status, CheckStatus::Success));

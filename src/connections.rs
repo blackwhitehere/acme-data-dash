@@ -1,5 +1,5 @@
-use crate::secrets::SecretStore;
 use crate::db::Db;
+use crate::secrets::SecretStore;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use thiserror::Error;
@@ -19,6 +19,7 @@ pub struct ConnectionProfile {
     pub name: String,
     pub driver: String,
     pub connection_string_template: String,
+    pub connection_type: Option<String>,
     pub secret_ref: Option<String>,
 }
 
@@ -29,20 +30,22 @@ pub struct ConnectionManager {
 
 impl ConnectionManager {
     pub fn new(db: Db, secret_store: Arc<dyn SecretStore>) -> Self {
-        Self {
-            db,
-            secret_store,
-        }
+        Self { db, secret_store }
     }
 
     pub async fn get_connection_string(&self, name: &str) -> Result<String, ConnectionError> {
-        let profiles = self.db.get_connection_profiles().await
+        let profiles = self
+            .db
+            .get_connection_profiles()
+            .await
             .map_err(|e| ConnectionError::DriverError(e.to_string()))?;
-        
-        let profile = profiles.into_iter().find(|(n, _, _, _)| n == name)
+
+        let profile = profiles
+            .into_iter()
+            .find(|(n, _, _, _, _)| n == name)
             .ok_or_else(|| ConnectionError::ProfileNotFound(name.to_string()))?;
-        
-        let (_, _, tmpl, secret_ref) = profile;
+
+        let (_, _, tmpl, _conn_type, secret_ref) = profile;
         let mut conn_str = tmpl;
 
         if let Some(s_ref) = secret_ref {

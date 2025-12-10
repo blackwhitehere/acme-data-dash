@@ -3,9 +3,9 @@
   import CheckList from './lib/CheckList.svelte';
   import CheckRunner from './lib/CheckRunner.svelte';
   import History from './lib/History.svelte';
-  import Settings from './lib/Settings.svelte';
+  import DataSources from './lib/DataSources.svelte';
 
-  let view = 'dashboard'; // dashboard, history, settings
+  let view = 'dashboard'; // dashboard, history, data-sources
   let selectedCheck = null;
   let checks = [];
 
@@ -30,9 +30,9 @@
 
 <nav>
   <h1>Acme Data Dash</h1>
-  <a href="#" class:active={view === 'dashboard'} on:click|preventDefault={goHome}>Dashboard</a>
-  <a href="#" class:active={view === 'history'} on:click|preventDefault={() => { view = 'history'; selectedCheck = null; }}>History</a>
-  <a href="#" class:active={view === 'settings'} on:click|preventDefault={() => { view = 'settings'; selectedCheck = null; }}>Settings</a>
+  <button class:active={view === 'dashboard'} on:click={goHome}>Dashboard</button>
+  <button class:active={view === 'history'} on:click={() => { view = 'history'; selectedCheck = null; }}>History</button>
+  <button class:active={view === 'data-sources'} on:click={() => { view = 'data-sources'; selectedCheck = null; }}>Data Sources</button>
 </nav>
 
 <main>
@@ -44,7 +44,7 @@
     {/if}
   {:else if view === 'history'}
     <History />
-  {:else if view === 'settings'}
-    <Settings />
+  {:else if view === 'data-sources'}
+    <DataSources />
   {/if}
 </main>

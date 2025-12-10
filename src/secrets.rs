@@ -1,6 +1,6 @@
 use async_trait::async_trait;
-use std::env;
 use std::collections::HashMap;
+use std::env;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -40,7 +40,9 @@ impl DbSecretStore {
 #[async_trait]
 impl SecretStore for DbSecretStore {
     async fn get_secret(&self, key: &str) -> Result<String, SecretError> {
-        self.db.get_secret(key).await
+        self.db
+            .get_secret(key)
+            .await
             .map_err(|e| SecretError::StoreError(e.to_string()))?
             .ok_or_else(|| SecretError::NotFound(key.to_string()))
     }
@@ -60,6 +62,9 @@ impl MemorySecretStore {
 #[async_trait]
 impl SecretStore for MemorySecretStore {
     async fn get_secret(&self, key: &str) -> Result<String, SecretError> {
-        self.secrets.get(key).cloned().ok_or_else(|| SecretError::NotFound(key.to_string()))
+        self.secrets
+            .get(key)
+            .cloned()
+            .ok_or_else(|| SecretError::NotFound(key.to_string()))
     }
 }

@@ -13,6 +13,12 @@ cleanup() {
 }
 trap cleanup EXIT
 
+# Kill any processes using ports 3000 and 5173
+echo "Checking for processes using ports 3000 and 5173..."
+lsof -ti:3000 | xargs kill -9 2>/dev/null || true
+lsof -ti:5173 | xargs kill -9 2>/dev/null || true
+sleep 1
+
 echo "Starting Acme Data Dash in DEV mode..."
 
 # 1. Start Backend (Rust)

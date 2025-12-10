@@ -7,8 +7,8 @@ use acme_data_dash::{
 use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::net::TcpListener;
-use tracing::info;
 use tower_http::services::ServeDir;
+use tracing::info;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {

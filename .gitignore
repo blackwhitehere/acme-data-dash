@@ -4,3 +4,12 @@ logs/
 ui/node_modules
 ui/dist
 .sqlx
+
+# Data files
+*.db
+*.sqlite
+*.sqlite3
+*.parquet
+
+# OS metadata
+.DS_Store

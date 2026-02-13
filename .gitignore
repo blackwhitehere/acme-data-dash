@@ -13,3 +13,6 @@ ui/dist
 
 # OS metadata
 .DS_Store
+# DuckDB
+*.duckdb
+*.duckdb.wal
